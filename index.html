@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Planejamento Financeiro Familiar</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
+<style>
+:root{--bg:#f4f6f8;--card:#fff;--ink:#07111f;--muted:#5b6472;--line:#d8dee7;--brand:#111827;--ok:#08796f;--warn:#b45309;--bad:#b91c1c;--soft:#eef2f7}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#111827;color:#fff;padding:16px 18px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}header h1{margin:0 0 12px;font-size:22px}nav{display:flex;gap:8px;overflow:auto;padding-bottom:2px}nav button{background:#263244;color:#fff;border:1px solid #3b4658;border-radius:999px;padding:9px 13px;font-weight:700;white-space:nowrap;cursor:pointer}nav button.active{background:#fff;color:#111827}.undoBtn{margin-top:10px;background:#facc15;color:#111827;border:0;border-radius:10px;padding:9px 12px;font-weight:800;cursor:pointer}
+main{max-width:1250px;margin:0 auto;padding:18px}.tab{display:none}.tab.active{display:block}.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 4px #0000000d}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.metric small{color:#536071;display:block;margin-bottom:6px}.metric b{font-size:28px}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+label{display:block;font-size:13px;font-weight:700;margin-bottom:5px}input,select,textarea{width:100%;padding:10px 12px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:14px}button.primary{background:#111827;color:white;border:0;border-radius:10px;padding:11px 14px;font-weight:800;cursor:pointer}button.danger{background:#991b1b;color:white;border:0;border-radius:8px;padding:8px 10px}button.secondary{background:#e8edf4;border:1px solid #cbd5e1;border-radius:8px;padding:8px 10px;font-weight:700}table{width:100%;border-collapse:collapse;background:#fff}th,td{border-bottom:1px solid var(--line);padding:9px;text-align:left;vertical-align:middle}th{background:#f1f5f9}.actions{display:flex;gap:5px;flex-wrap:wrap}.bar{height:20px;background:#e5e7eb;border-radius:999px;overflow:hidden;position:relative}.bar span{display:block;height:100%;background:var(--ok);min-width:2px}.bar .over{background:var(--bad)}.muted{color:var(--muted);font-size:13px}.pill{display:inline-block;padding:4px 8px;border-radius:999px;background:#eef2f7;font-weight:700}.cut li{margin-bottom:8px}.canvasBox{height:280px}.nowrap{white-space:nowrap}.rowform{display:grid;grid-template-columns:repeat(5,1fr) auto;gap:8px;align-items:end}.rowform4{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:8px;align-items:end}.rowform3{display:grid;grid-template-columns:repeat(3,1fr) auto;gap:8px;align-items:end}.salvarAbaBar{border:2px solid #dbeafe;background:#eff6ff}.salvarAbaBar .primary{width:100%;font-size:15px}.saveStatus{margin-top:8px;color:#08796f;font-weight:700}.salvarTudoBox{border:2px solid #bbf7d0;background:#f0fdf4}.salvarTudoBox .primary{width:100%;font-size:17px;padding:14px 16px}
+.iaBox{background:#0f172a;color:#e5eefb;border:1px solid #22304a}.iaBox h2,.iaBox h3{color:#fff}.iaBox .muted{color:#b8c4d6}.iaActions{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.iaActions button{background:#10b981;color:#062019;border:0;border-radius:10px;padding:11px 13px;font-weight:900;cursor:pointer}.iaActions button.secondary{background:#e8edf4;color:#111827;border:1px solid #cbd5e1}.iaResult{white-space:pre-wrap;line-height:1.5;background:#fff;color:#07111f;border-radius:12px;padding:14px;margin-top:12px;min-height:90px;border:1px solid #d8dee7}.iaChat{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end}.iaChat textarea{min-height:90px}
+@media(max-width:900px){.grid,.grid2,.rowform,.rowform4,.rowform3{grid-template-columns:1fr}main{padding:10px}.metric b{font-size:24px}header{position:relative}}
+</style>
+</head>
+<body>
+<header><h1>Planejamento Financeiro Familiar</h1><nav id="nav"></nav><button class="undoBtn" onclick="desfazerUltimaAcao()">↶ Desfazer última ação</button></header>
+<main>
+<section id="painel" class="tab active"></section>
+<section id="salarios" class="tab"></section>
+<section id="saidas" class="tab"></section>
+<section id="projecoes" class="tab"></section>
+<section id="sonhos" class="tab"></section>
+<section id="acionistas" class="tab"></section>
+<section id="dividas" class="tab"></section>
+<section id="patrimonio" class="tab"></section>
+<section id="empresa" class="tab"></section>
+<section id="relatorios" class="tab"></section>
+<section id="categorias" class="tab"></section>
+<section id="backup" class="tab"></section>
+<section id="ia" class="tab"></section>
+</main>
+<script>
+const firebaseConfig={apiKey:"AIzaSyDrcjStUK_Za9bNz0ku0KmlhrWng48v1Bk",authDomain:"gestao-financeira-famili-f2e28.firebaseapp.com",projectId:"gestao-financeira-famili-f2e28",storageBucket:"gestao-financeira-famili-f2e28.firebasestorage.app",messagingSenderId:"325312000000",appId:"1:325312000000:web:3987bfd174b42fb5d168e5",measurementId:"G-BJK5PQ4BT4"};
+let db=null,docRef=null;try{firebase.initializeApp(firebaseConfig);db=firebase.firestore();docRef=db.collection('financeiro').doc('dados')}catch(e){console.warn(e)}
+const BRL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});const fmt=v=>BRL.format(Number(v||0));const num=v=>Number(String(v??'').replace(/\./g,'').replace(',','.').replace(/[^0-9.-]/g,''))||0;const today=()=>new Date().toISOString().slice(0,10);const month=()=>new Date().toISOString().slice(0,7);const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const tabs=[['painel','Painel'],['salarios','Salário'],['saidas','Saídas'],['projecoes','Projeções'],['sonhos','Sonhos'],['acionistas','Acionistas'],['dividas','Dívidas'],['patrimonio','Patrimônio'],['empresa','Empresa'],['relatorios','Relatórios'],['categorias','Categorias'],['backup','Backup'],['ia','🧠 IA Financeira']];
+const defaultCats=['Lanches','comida','daniel','Wendy','Lazer','Meninas','Outros','gas','casa','preju','compras conforto','compras','Trampo','cha','farmacia','Acionistas','Juros','Dívidas'];
+let state={salario:40000,salarios:[{id:uid(),mes:month(),valor:40000,obs:'Salário padrão'}],categorias:defaultCats,saidas:[],projecoes:[],sonhos:[],acionistas:[],dividas:[],patrimonio:[],empresa:{capitalAtivo:0,entradas:0,saidas:0,investidores:0},catLimits:{},ultimaAtualizacao:{data:'',hora:''},ultimaAtualizacaoSaidas:{data:'',hora:''},historico:[],backups:{},projecoesExcluidas:[],deletedCategories:[],mesControle:month()};
+let charts={};
+let undoStack=[];
+function cloneState(obj){return JSON.parse(JSON.stringify(obj));}
+function saveUndo(label='ação'){try{undoStack.push({label,state:cloneState(state)});if(undoStack.length>20)undoStack.shift();localStorage.setItem('financeiro_familiar_undo',JSON.stringify(undoStack));}catch(e){console.warn('Não consegui guardar desfazer',e)}}
+async function desfazerUltimaAcao(){try{if(!undoStack.length){let old=localStorage.getItem('financeiro_familiar_undo');if(old)undoStack=JSON.parse(old)||[]}if(!undoStack.length){alert('Não há ação para desfazer.');return}let last=undoStack.pop();state=normalize(last.state);localStorage.setItem('financeiro_familiar',JSON.stringify(state));localStorage.setItem('financeiro_familiar_undo',JSON.stringify(undoStack));render();syncMsg('Ação desfeita. Salvando na nuvem...');if(docRef){await docRef.set(state);syncMsg('Última ação desfeita e salva na nuvem.')}}catch(e){console.error(e);alert('Não consegui desfazer a última ação.')}}
+function ensureArray(v){
+  if(Array.isArray(v)) return v;
+  if(v && typeof v==='object'){
+    const m = v.mes || v.currentMonth || month();
+    if(Array.isArray(v[m])) return v[m];
+    return Object.values(v).flat().filter(x=>x && typeof x==='object');
+  }
+  return [];
+}
+function normalizeCategoriaList(cats, oldLimits){
+  let limits = {...(oldLimits||{})};
+  let list = cats;
+  if(!Array.isArray(list) || !list.length) list = defaultCats;
+  const nomes=[];
+  list.forEach(c=>{
+    if(typeof c==='string') nomes.push(c);
+    else if(c && typeof c==='object'){
+      const nome = c.nome || c.categoria || c.name;
+      if(nome){ nomes.push(nome); if(c.limite!=null) limits[nome]=num(c.limite); }
+    }
+  });
+  // Não recoloca categorias padrão depois que você exclui. Só usa padrão quando a lista está vazia.
+  return {categorias:[...new Set(nomes.filter(Boolean))], catLimits:limits};
+}
+
+function limparPatrimonioDasSaidas(st){
+  // Remove lançamentos que eram patrimônio e foram parar em "Categoria excluída".
+  // S10 e AP já ficam controlados na aba Patrimônio, então não devem pesar como saída do mês.
+  st=st||{};
+  const antes=(st.saidas||[]).length;
+  st.saidas=(st.saidas||[]).filter(x=>{
+    const cat=String(x.categoria||'').trim().toLowerCase();
+    const desc=String(x.descricao||x.desc||'').trim().toLowerCase();
+    const valor=num(x.valor);
+    if(cat==='categoria excluída' && ((desc==='s10' && valor===5000) || (desc==='ap' && valor===1000))) return false;
+    return true;
+  });
+  st.limpezaPatrimonioSaidas={removidos:antes-(st.saidas||[]).length,ultimaVerificacao:today()};
+  return st;
+}
+
+function garantirCategoriasFinanceiras(st){
+  st.categorias=Array.isArray(st.categorias)?st.categorias:[];
+  st.deletedCategories=Array.isArray(st.deletedCategories)?st.deletedCategories:[];
+  st.catLimits=st.catLimits||{};
+  st.projecoes=ensureArray(st.projecoes);
+  const defs=[
+    {cat:'Acionistas',limite:8400,desc:'Juros acionistas'},
+    {cat:'Juros',limite:8400,desc:'Juros acionistas'},
+    {cat:'Dívidas',limite:9500,desc:'Parcelas dívidas'}
+  ];
+  defs.forEach(d=>{
+    if(st.deletedCategories.includes(d.cat))return;
+    if(!st.categorias.includes(d.cat))st.categorias.push(d.cat);
+    if(!num(st.catLimits[d.cat]))st.catLimits[d.cat]=d.limite;
+    const existe=st.projecoes.some(p=>p.categoria===d.cat && String(p.descricao||p.desc||'').toLowerCase()===d.desc.toLowerCase());
+    if(!existe)st.projecoes.push({id:uid(),data:'',categoria:d.cat,descricao:d.desc,desc:d.desc,previsto:d.limite,pago:0});
+  });
+  return st;
+}
+function normalize(s){
+  s=s||{};
+  if(s.state && typeof s.state==='object') s=s.state;
+  if(s.data && typeof s.data==='object') s=s.data;
+  const cats=normalizeCategoriaList(s.categorias, s.catLimits || s.limites || {});
+  let salarios=ensureArray(s.salarios).map(x=>({id:x.id||uid(),mes:x.mes||x.month||month(),valor:num(x.valor??x.salario??x.value),obs:x.obs||x.observacao||''}));
+  if(!salarios.length){
+    if(s.salarios && !Array.isArray(s.salarios) && typeof s.salarios==='object') salarios=Object.entries(s.salarios).map(([mes,valor])=>({id:uid(),mes,valor:num(valor),obs:''}));
+    else salarios=[{id:uid(),mes:month(),valor:num(s.salario||40000),obs:'Salário padrão'}];
+  }
+  let saidas=ensureArray(s.saidas).map(x=>({id:x.id||uid(),vinculoId:x.vinculoId||'',data:x.data||x.date||today(),categoria:x.categoria||x.cat||x.category||'Outros',descricao:x.descricao||x.desc||x.observacao||'',desc:x.desc||x.descricao||x.observacao||'',valor:num(x.valor||x.value)})).filter(x=>x.valor||x.descricao||x.desc);
+  saidas=saidas.map(x=>{let d=String(x.descricao||x.desc||'').toLowerCase();if((String(x.vinculoId||'').startsWith('ac-')||d.includes('acionista'))&&x.categoria==='Juros')return {...x,categoria:'Acionistas'};return x;});
+  let projecoes=ensureArray(s.projecoes).map(x=>({id:x.id||uid(),data:x.data||x.dia||'',categoria:x.categoria||x.cat||x.category||'Outros',descricao:x.descricao||x.desc||'',previsto:num(x.previsto??x.valor??x.limite),pago:num(x.pago)})).filter(x=>x.previsto||x.pago||x.descricao);
+  let sonhos=ensureArray(s.sonhos).map(x=>({id:x.id||uid(),nome:x.nome||x.sonho||'',valor:num(x.valor??x.meta),guardado:num(x.guardado??x.valorGuardado),data:x.data||x.dataAlvo||x.prazo||''}));
+  let acionistas=ensureArray(s.acionistas).map(x=>({id:x.id||uid(),nome:x.nome||'',valor:num(x.valor),percentual:num(x.percentual),dia:x.dia||x.dataPagamento||'',pago:!!x.pago,pagamentoSaidaId:x.pagamentoSaidaId||''}));
+  let dividas=ensureArray(s.dividas).map(x=>({id:x.id||uid(),nome:x.nome||'',valorParcela:num(x.valorParcela??x.parcela),totalParcelas:num(x.totalParcelas??x.total),dataPagamento:x.dataPagamento||x.data||x.dia||'',pago:!!x.pago,pagamentoSaidaId:x.pagamentoSaidaId||''}));
+  let patrimonio=ensureArray(s.patrimonio).map(x=>({id:x.id||uid(),nome:x.nome||x.bem||'',valor:num(x.valor),obs:x.obs||x.observacao||''}));
+  const e=s.empresa||{};
+  const empresa={valorRua:num(e.valorRua??e.capitalAtivo),jurosCobradoPct:num(e.jurosCobradoPct??e.margemBruta),dividaInvestidores:num(e.dividaInvestidores??e.capitalAcionistas??e.investidores),pctPagoInvestidores:num(e.pctPagoInvestidores??e.percentualPago),entradas:num(e.entradas),saidas:num(e.saidas)};
+  return limparPatrimonioDasSaidas(garantirCategoriasFinanceiras({...state,...s,categorias:cats.categorias,catLimits:cats.catLimits,salarios,saidas,projecoes,sonhos,acionistas,dividas,patrimonio,empresa,ultimaAtualizacao:s.ultimaAtualizacao||{data:'',hora:''},ultimaAtualizacaoSaidas:s.ultimaAtualizacaoSaidas||{data:'',hora:''},historico:ensureArray(s.historico),backups:(s.backups&&typeof s.backups==='object')?s.backups:{},projecoesExcluidas:ensureArray(s.projecoesExcluidas),deletedCategories:ensureArray(s.deletedCategories),mesControle:s.mesControle||s.mesAtual||month()}));
+}
+async function save(replace=false){
+  state=normalize(state);
+  try{
+    let a=agoraLocal();
+    state.ultimaAtualizacao={data:a.data,hora:a.hora};
+    criarBackupAutomatico('Auto save');
+  }catch(e){console.warn('Auto backup não gerado',e)}
+  localStorage.setItem('financeiro_familiar',JSON.stringify(state));
+  if(docRef){
+    try{
+      replace?await docRef.set(state):await docRef.set(state,{merge:true});
+      syncMsg('Auto save feito na nuvem em '+(state.ultimaAtualizacao.data||'--')+' às '+(state.ultimaAtualizacao.hora||'--')+'.');
+    }catch(e){console.error(e);syncMsg('Não consegui salvar na nuvem agora. Verifique internet/regras do Firestore.')}
+  }
+}
+function agoraLocal(){let d=new Date();return {data:d.toISOString().slice(0,10),hora:d.toTimeString().slice(0,5),iso:d.toISOString()}}
+function snapshotSemBackups(){let copy=JSON.parse(JSON.stringify(state));delete copy.backups;return copy}
+function criarBackupAutomatico(motivo='alteração'){state.backups=state.backups||{};let a=agoraLocal();let chave=a.data+'_'+a.hora.replace(':','-')+'_'+Date.now();state.backups[chave]={motivo,geradoEm:a.iso,ultimaAtualizacao:state.ultimaAtualizacao||{data:'',hora:''},dados:snapshotSemBackups()};let keys=Object.keys(state.backups).sort();while(keys.length>15){delete state.backups[keys.shift()]}}
+async function salvarTudoSistema(){
+  try{let el=document.activeElement;if(el&&typeof el.blur==='function')el.blur();}catch(e){}
+  setTimeout(async()=>{
+    try{
+      saveUndo('salvar tudo');
+      let a=agoraLocal();
+      state.ultimaAtualizacao={data:a.data,hora:a.hora};
+      criarBackupAutomatico('Salvar todas as alterações');
+      localStorage.setItem('financeiro_familiar',JSON.stringify(state));
+      if(docRef){
+        syncMsg('Salvando tudo no Firebase e criando backup...');
+        await docRef.set(state);
+        syncMsg('Tudo salvo no Firebase. Backup automático criado em '+a.data+' às '+a.hora+'.');
+      }else{
+        syncMsg('Salvo no navegador. Firebase não conectado.');
+      }
+      render();
+      alert('Todas as alterações foram salvas. Último salvamento registrado e backup automático enviado ao banco de dados.');
+    }catch(e){console.error(e);alert('Não consegui salvar no Firebase. Verifique a internet e as regras do Firestore.')}
+  },150)
+}
+async function salvarAlteracoesAba(nome='aba'){return salvarTudoSistema()}
+function addSaveButtons(){document.querySelectorAll('.salvarAbaBar').forEach(e=>e.remove())}
+async function load(){try{let local=localStorage.getItem('financeiro_familiar');if(local)state=normalize(JSON.parse(local));}catch(e){console.warn('localStorage inválido',e);localStorage.removeItem('financeiro_familiar')}if(docRef){try{let snap=await docRef.get();if(snap.exists){state=normalize(snap.data());localStorage.setItem('financeiro_familiar',JSON.stringify(state));syncMsg('Dados carregados da nuvem.')}}catch(e){console.error(e);syncMsg('Sem conexão com a nuvem. Usando dados deste aparelho.')}}await verificarFechamentoAutomaticoMes();render()}
+function syncMsg(t){let el=document.getElementById('syncMsg');if(el)el.textContent=t}
+function setupNav(){document.getElementById('nav').innerHTML=tabs.map((t,i)=>`<button class="${i==0?'active':''}" onclick="showTab('${t[0]}',this)">${t[1]}</button>`).join('')}
+function showTab(id,btn){document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active');setTimeout(renderCharts,50)}
+function catOptions(sel=''){return state.categorias.map(c=>`<option ${c==sel?'selected':''}>${c}</option>`).join('')}
+function salarioAtual(){let m=month();let rec=state.salarios.filter(s=>s.mes<=m).sort((a,b)=>String(b.mes).localeCompare(String(a.mes)))[0]||state.salarios[0];return num(rec?.valor||state.salario||0)}
+function totaisCat(){let t={};state.categorias.forEach(c=>t[c]=0);state.saidas.forEach(s=>{t[s.categoria]=(t[s.categoria]||0)+num(s.valor)});return t}
+function totalGasto(){return state.saidas.reduce((a,s)=>a+num(s.valor),0)}
+function totalPrevisto(){return state.projecoes.reduce((a,p)=>a+num(p.previsto),0)}
+function autoPagosProj(){
+  let gastos={...totaisCat()},res={};
+  let porCat={};
+  state.projecoes.forEach(p=>{(porCat[p.categoria]=porCat[p.categoria]||[]).push(p)});
+  Object.keys(porCat).forEach(cat=>{
+    let restante=num(gastos[cat]||0),lista=porCat[cat];
+    lista.forEach((p,i)=>{
+      let manual=num(p.pago),prev=num(p.previsto);
+      let cap=Math.max(0,prev-manual);
+      let auto=i==lista.length-1?restante:Math.min(restante,cap);
+      res[p.id]=Math.max(0,auto);
+      restante-=auto;
+    });
+  });
+  return res;
+}
+function pagoProjTotal(){return Math.min(totalGasto(),totalPrevisto())}
+function totalAPagar(){return Math.max(0,totalPrevisto()-totalGasto())}
+function sobraPlano(){return salarioAtual()-totalPrevisto()}
+function aindaPodeGastar(){return Math.max(0,salarioAtual()-totalGasto())}
+function previstoCategoria(c){return state.projecoes.filter(p=>p.categoria===c).reduce((a,p)=>a+num(p.previsto),0)}
+function limiteCategoria(c){let v=num((state.catLimits||{})[c]);if(v>0)return v;let p=previstoCategoria(c);return p>0?p:0}
+function categoriasProjetadasFaltando(){return [...new Set(state.projecoes.map(p=>p.categoria).filter(c=>c&&!state.categorias.includes(c)))]}
+function conciliarLimitesComProjecoes(){
+  saveUndo('conciliar limites');
+  state.catLimits=state.catLimits||{};
+  state.projecoes.forEach(p=>{if(p.categoria){if(!state.categorias.includes(p.categoria))state.categorias.push(p.categoria);}});
+  state.categorias.forEach(c=>{let previsto=previstoCategoria(c);if(previsto>0)state.catLimits[c]=previsto;});
+  save();render();alert('Limites copiados da aba Projeções e salvos no Firebase.');
+}
+function despesasPorCategoria(){let tc=totaisCat();return state.categorias.map(c=>{let lim=limiteCategoria(c);let gasto=tc[c]||0;return {categoria:c,gasto:gasto,limite:lim,temLimite:lim>0,restante:lim>0?Math.max(0,lim-gasto):0,pct:(lim>0?(gasto/lim)*100:0)}})}
+function categoriasSemLimite(){return despesasPorCategoria().filter(x=>!x.temLimite&&x.gasto>0).sort((a,b)=>b.gasto-a.gasto)}
+function projDia(p){return p.dia||p.data||''}
+function projDesc(p){return p.desc||p.descricao||''}
+function projSortValue(p){let d=String(projDia(p)||'').trim();let now=new Date();if(/^\d{4}-\d{2}-\d{2}$/.test(d))return new Date(d+'T00:00:00').getTime();let n=parseInt(d.replace(/\D/g,''),10);if(!isNaN(n)&&n>0)return new Date(now.getFullYear(),now.getMonth(),n).getTime();return 9999999999999}
+function projListOrdenada(){return [...state.projecoes].sort((a,b)=>projSortValue(a)-projSortValue(b)||String(projDesc(a)).localeCompare(String(projDesc(b))))}
+function fmtDiaProj(p){let d=String(projDia(p)||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(d)){let [y,m,dd]=d.split('-');return dd+'/'+m+'/'+y}return d?('Dia '+d):'Sem data'}
+function sortPagamentoData(data){let d=String(data||'').trim();let now=new Date();if(/^\d{4}-\d{2}-\d{2}$/.test(d))return new Date(d+'T00:00:00').getTime();let m=d.match(/^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/);if(m){let ano=m[3]?parseInt(m[3].length===2?'20'+m[3]:m[3],10):now.getFullYear();return new Date(ano,parseInt(m[2],10)-1,parseInt(m[1],10)).getTime()}let n=parseInt(d.replace(/\D/g,''),10);if(!isNaN(n)&&n>0)return new Date(now.getFullYear(),now.getMonth(),n).getTime();return 9999999999999}
+function inicioHoje(){let h=new Date();h.setHours(0,0,0,0);return h.getTime()}
+function dataPagamentoEhHojeOuFutura(data){let d=String(data||'').trim();if(!d)return false;let t=sortPagamentoData(d);return t!==9999999999999&&t>=inicioHoje()}
+function fmtDataPagamento(data){let d=String(data||'').trim();if(/^\d{4}-\d{2}-\d{2}$/.test(d)){let [y,m,dd]=d.split('-');return dd+'/'+m+'/'+y}if(/^\d{1,2}\/\d{1,2}/.test(d))return d;return d?('Dia '+d):'Sem data'}
+function todosPagamentosAFazer(){let auto=autoPagosProj();let lista=[];
+  projListOrdenada().forEach(p=>{let pago=num(p.pago)+num(auto[p.id]),apagar=Math.max(0,num(p.previsto)-pago);if(apagar>0)lista.push({tipo:'Projeção',data:projDia(p),descricao:projDesc(p)||'Projeção',categoria:p.categoria||'-',apagar})});
+  (state.dividas||[]).forEach(d=>{if(!d.pago&&num(d.valorParcela)>0)lista.push({tipo:'Dívida',data:d.dataPagamento||'',descricao:'Parcela dívida - '+(d.nome||''),categoria:'Dívidas',apagar:num(d.valorParcela)})});
+  (state.acionistas||[]).forEach(a=>{let j=jurosAc(a);if(!a.pago&&j>0)lista.push({tipo:'Acionista',data:a.dia||'',descricao:'Juros acionista - '+(a.nome||''),categoria:'Acionistas',apagar:j})});
+  return lista.sort((a,b)=>sortPagamentoData(a.data)-sortPagamentoData(b.data)||String(a.categoria).localeCompare(String(b.categoria))||String(a.descricao).localeCompare(String(b.descricao)))}
+function temDataPagamento(data){return String(data||'').trim().length>0}
+function proximosPagamentos(){return todosPagamentosAFazer().filter(p=>temDataPagamento(p.data)&&dataPagamentoEhHojeOuFutura(p.data))}
+function dataPagamentoAtrasada(data){let d=String(data||'').trim();if(!d)return false;let t=sortPagamentoData(d);return t!==9999999999999&&t<inicioHoje()}
+function pagamentosAtrasados(){return todosPagamentosAFazer().filter(p=>temDataPagamento(p.data)&&dataPagamentoAtrasada(p.data))}
+function gastosForaProjecao(){let previstoCat={};state.projecoes.forEach(p=>{previstoCat[p.categoria]=(previstoCat[p.categoria]||0)+num(p.previsto)});let gastos=totaisCat();return Object.keys(gastos).filter(c=>num(gastos[c])>0&&num(gastos[c])>num(previstoCat[c]||0)).map(c=>({categoria:c,gasto:num(gastos[c]),previsto:num(previstoCat[c]||0),excesso:num(gastos[c])-num(previstoCat[c]||0)})).sort((a,b)=>b.excesso-a.excesso)}
+
+function parcelasDividasMes(){return state.dividas.reduce((a,d)=>a+num(d.valorParcela),0)}
+function jurosAcionistasMes(){return state.acionistas.reduce((a,x)=>a+jurosAc(x),0)}
+function lucroEmpresa(){let e=state.empresa||{};let valorRua=num(e.valorRua??e.capitalAtivo),pctCobrado=num(e.jurosCobradoPct??e.margemBruta),devoInv=num(e.dividaInvestidores??e.capitalAcionistas??e.investidores),pctPago=num(e.pctPagoInvestidores??e.percentualPago);let bruto=valorRua*pctCobrado/100;let jurosInv=devoInv*pctPago/100;return bruto-jurosInv}
+function entradasPrevistasMes(){return salarioAtual()}
+function totalSaidasPlanejadas(){return totalPrevisto()}
+function faltaPagarMes(){return Math.max(0,totalSaidasPlanejadas()-totalGasto())}
+function resultadoLiquidoPrevisto(){return entradasPrevistasMes()-totalSaidasPlanejadas()}
+function quantoPossoGastarTotal(){return Math.max(0,salarioAtual()-totalGasto())}
+function resumoMesAtual(mesRef=month()){
+  return {id:mesRef,mes:mesRef,salario:salarioAtual(),gasto:totalGasto(),previsto:totalPrevisto(),parcelas:parcelasDividasMes(),juros:jurosAcionistasMes(),totalProjetado:totalSaidasPlanejadas(),faltaPagar:faltaPagarMes(),sobra:resultadoLiquidoPrevisto(),registradoEm:new Date().toISOString()}
+}
+function limparPagamentosDoMes(){
+  // Vira o mês mantendo cadastros, projeções, acionistas, dívidas, sonhos e patrimônio.
+  // Zera apenas os lançamentos do mês e os valores pagos manualmente nas projeções.
+  state.saidas=[];
+  state.projecoes=(state.projecoes||[]).map(p=>({...p,pago:0,pagoManual:0,marcado:false,pagoMarcado:false,check:false,checked:false}));
+}
+async function verificarFechamentoAutomaticoMes(){
+  try{
+    state.mesControle=state.mesControle||month();
+    const mesAgora=month();
+    if(state.mesControle!==mesAgora){
+      saveUndo('fechamento automático do mês');
+      const mesFechado=state.mesControle;
+      const r=resumoMesAtual(mesFechado);
+      state.historico=ensureArray(state.historico).filter(x=>x.mes!==mesFechado);
+      state.historico.push(r);
+      criarBackupAutomatico('Fechamento automático do mês '+mesFechado);
+      limparPagamentosDoMes();
+      state.mesControle=mesAgora;
+      const a=agoraLocal();
+      state.ultimaAtualizacao={data:a.data,hora:a.hora};
+      localStorage.setItem('financeiro_familiar',JSON.stringify(state));
+      if(docRef) await docRef.set(state);
+      setTimeout(()=>alert('O mês '+mesFechado+' foi fechado automaticamente. Os pagamentos lançados foram zerados, mas suas projeções, dívidas, acionistas, parcelas pagas e demais cadastros foram mantidos.'),300);
+    }
+  }catch(e){console.error('Erro no fechamento automático do mês',e)}
+}
+function fecharMesManual(){
+  if(!confirm('Fechar este mês agora? Isso salva o resumo em Relatórios, zera os gastos lançados e desmarca pagamentos das projeções. Cadastros, parcelas pagas, acionistas, dívidas e projeções serão mantidos.'))return;
+  saveUndo('fechamento manual do mês');
+  const mesFechado=state.mesControle||month();
+  const r=resumoMesAtual(mesFechado);
+  state.historico=ensureArray(state.historico).filter(x=>x.mes!==mesFechado);
+  state.historico.push(r);
+  criarBackupAutomatico('Fechamento manual do mês '+mesFechado);
+  limparPagamentosDoMes();
+  state.mesControle=month();
+  save(true).then(()=>{render();alert('Mês fechado. Pagamentos lançados zerados e resumo salvo nos relatórios.');});
+}
+function fecharResumoMes(){
+  saveUndo('fechar resumo mensal');
+  state.historico=ensureArray(state.historico);
+  let r=resumoMesAtual();
+  state.historico=state.historico.filter(x=>x.mes!==r.mes);
+  state.historico.push(r);
+  save();render();alert('Resumo do mês salvo nos relatórios e no Firebase.');
+}
+function render(){renderPainel();renderSalarios();renderSaidas();renderProjecoes();renderSonhos();renderAcionistas();renderDividas();renderPatrimonio();renderEmpresa();renderRelatorios();renderCategorias();renderBackup();renderIA();addSaveButtons();setTimeout(renderCharts,80)}
+function renderPainel(){let sal=salarioAtual(),tg=totalGasto(),tp=totalPrevisto(),parcelas=parcelasDividasMes(),juros=jurosAcionistasMes(),saidaTotal=totalSaidasPlanejadas(),falta=faltaPagarMes(),resultado=resultadoLiquidoPrevisto();let nota=(resultado>0?10:(resultado===0?7:Math.max(0,7-(Math.abs(resultado)/Math.max(1,sal)*7)))).toFixed(1);let proximos=[...state.sonhos].filter(s=>s.data).sort((a,b)=>String(a.data).localeCompare(String(b.data))).slice(0,3);let pagamentos=proximosPagamentos();let atrasados=pagamentosAtrasados();let proximaConta=pagamentos[0];let cortes=rankingCortes();let foraProj=gastosForaProjecao();let semLimite=categoriasSemLimite();
+ document.getElementById('painel').innerHTML=`<h2>Painel geral</h2><div class="grid"><div class="card metric"><small>Salário / ganhos do mês</small><b>${fmt(sal)}</b></div><div class="card metric"><small>Quanto já gastei</small><b class="${tg>sal?'bad':'ok'}">${fmt(tg)}</b></div><div class="card metric"><small>Projeções de despesas</small><b>${fmt(tp)}</b></div><div class="card metric"><small>Projeção total de saída do mês</small><b class="${saidaTotal>sal?'bad':'ok'}">${fmt(saidaTotal)}</b></div><div class="card metric"><small>Quanto falta pagar</small><b>${fmt(falta)}</b></div><div class="card metric"><small>Ainda pode gastar no salário</small><b>${fmt(quantoPossoGastarTotal())}</b></div><div class="card metric"><small>Parcelas sendo pagas no mês</small><b>${fmt(parcelas)}</b></div><div class="card metric"><small>Juros pagos no mês</small><b class="bad">${fmt(juros)}</b></div><div class="card metric"><small>Como ficará meu mês</small><b class="${resultado<0?'bad':'ok'}">${fmt(resultado)}</b></div><div class="card metric"><small>Última atualização das saídas</small><b>${(state.ultimaAtualizacaoSaidas&&state.ultimaAtualizacaoSaidas.data)?state.ultimaAtualizacaoSaidas.data+' '+(state.ultimaAtualizacaoSaidas.hora||''):'--'}</b></div><div class="card metric"><small>Saúde financeira</small><b class="${nota<7?'bad':nota<8.5?'warn':'ok'}">${nota}/10</b></div></div>
+ <div class="card" style="border:2px solid #facc15;background:#fffbeb"><h2>🚨 Próxima conta a pagar</h2>${proximaConta?`<p><b>${fmtDataPagamento(proximaConta.data)}</b> — ${proximaConta.tipo||'Projeção'} — ${proximaConta.descricao||'-'} — <b>${fmt(proximaConta.apagar)}</b></p><p class="muted">Mostra apenas contas de hoje para frente.</p>`:'<p class="muted">Nenhuma próxima conta com data de hoje para frente.</p>'}</div>
+ <div class="card"><h2>⚠️ Contas vencidas não marcadas como pagas</h2><p class="muted">Mostra contas com data anterior a hoje que ainda não foram marcadas como pagas.</p>${atrasados.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>A pagar</th></tr></thead><tbody>${atrasados.map(p=>`<tr style="background:#fef2f2"><td><b>${fmtDataPagamento(p.data)}</b></td><td>${p.tipo||'Projeção'}</td><td>${p.descricao||'-'}</td><td>${p.categoria||'-'}</td><td><b>${fmt(p.apagar)}</b></td></tr>`).join('')}</tbody></table>`:'<p class="muted">Nenhuma conta vencida pendente.</p>'}</div>
+ <div class="card"><h2>Todas as próximas contas a pagar com data</h2><p class="muted">Mostra somente contas pendentes com data de hoje para frente. Contas antigas ou já pagas não aparecem.</p>${pagamentos.length?`<table><thead><tr><th>Data</th><th>Tipo</th><th>Descrição</th><th>Categoria</th><th>A pagar</th></tr></thead><tbody>${pagamentos.map((p,i)=>`<tr ${i===0?'style="background:#fffbeb"':''}><td><b>${fmtDataPagamento(p.data)}</b></td><td>${p.tipo||'Projeção'}</td><td>${p.descricao||'-'}</td><td>${p.categoria||'-'}</td><td><b>${fmt(p.apagar)}</b></td></tr>`).join('')}</tbody></table>`:'<p class="muted">Nenhum pagamento futuro pendente.</p>'}</div>
+ <div class="card salvarTudoBox"><h2>Salvar sistema</h2><p id="syncMsg" class="muted">Dados prontos.</p><button class="primary" onclick="salvarTudoSistema()">💾 Salvar todas as alterações</button><p class="muted">Salva todas as abas, registra data/hora e cria backup automático no Firebase.</p><p class="muted">Último salvamento registrado: ${(state.ultimaAtualizacao.data||'--')} às ${(state.ultimaAtualizacao.hora||'--')}</p></div>
+ <div class="card"><h2>Gastos fora da projeção</h2>${foraProj.length?`<p class="warn"><b>Atenção:</b> existem gastos lançados acima do previsto. Se foi uma conta real, adicione ou ajuste essa conta na aba Projeções.</p><table><thead><tr><th>Categoria</th><th>Gasto lançado</th><th>Previsto</th><th>Diferença</th></tr></thead><tbody>${foraProj.map(x=>`<tr><td>${x.categoria}</td><td>${fmt(x.gasto)}</td><td>${fmt(x.previsto)}</td><td><b class="bad">${fmt(x.excesso)}</b></td></tr>`).join('')}</tbody></table>`:'<p class="ok">Todos os gastos lançados estão cobertos pelas projeções.</p>'}</div>
+ <div class="grid2"><div class="card"><h2>Quanto já gastamos de cada limite</h2><p class="muted">Cada categoria com limite tem uma barra única: ela vai enchendo conforme gasta; se ultrapassar o limite, aparece vermelho.</p><canvas id="catChart"></canvas>${semLimite.length?`<div class="warn" style="margin-top:12px"><b>Limite não configurado:</b><br>${semLimite.map(x=>`${x.categoria}: ${fmt(x.gasto)}`).join('<br>')}</div>`:''}</div><div class="card"><h2>Resumo do mês</h2>${despesasPorCategoria().filter(x=>x.temLimite).map(x=>`<p><b>${x.categoria}</b><br>${fmt(x.gasto)} de ${fmt(x.limite)} <span class="${x.pct>100?'bad':x.pct>80?'warn':'ok'}">${x.pct.toFixed(0)}%</span></p>`).join('')||'<p class="muted">Nenhum limite configurado.</p>'}${semLimite.length?`<hr><p class="muted"><b>Categorias sem limite definido</b><br>${semLimite.map(x=>`${x.categoria}: ${fmt(x.gasto)}`).join('<br>')}</p>`:''}</div></div>
+ <div class="grid2"><div class="card"><h2>Onde economizar temporariamente</h2><ul class="cut">${cortes.length?cortes.map(c=>`<li><b>${c.categoria}</b>: cortar até ${fmt(c.sugestao)} neste mês. ${c.motivo}</li>`).join(''):'<li>Por enquanto não há cortes urgentes. Proteja a folga e evite aumentar lazer, compras conforto, chá e outros.</li>'}</ul></div><div class="card"><h2>🎯 Próximos Sonhos</h2>${proximos.length?proximos.map(s=>sonhoCard(s)).join(''):'<p class="muted">Cadastre sonhos com data alvo para aparecerem aqui.</p>'}</div></div>`}
+function rankingCortes(){let flex=['compras conforto','cha','chá','Lazer','Outros','compras','Wendy','daniel'];let dados=despesasPorCategoria().filter(x=>x.temLimite&&(flex.includes(x.categoria)||x.pct>80)).sort((a,b)=>(b.pct-a.pct));return dados.slice(0,5).map(x=>({categoria:x.categoria,sugestao:Math.min(x.gasto,Math.max(100,x.gasto-(x.limite||0)*0.8)),motivo:x.pct>100?'Passou do limite.':'Categoria flexível para segurar o mês.'}))}
+function salvarAtualizacao(){salvarTudoSistema()}
+function renderSalarios(){document.getElementById('salarios').innerHTML=`<div class="card"><h2>Salários mensais</h2><div class="rowform3"><div><label>Mês</label><input id="salMes" type="month" value="${month()}"></div><div><label>Valor</label><input id="salValor" placeholder="40000"></div><div><label>Observação</label><input id="salObs" placeholder="Ex: salário ideal"></div><button class="primary" onclick="addSalario()">Adicionar salário</button></div></div><div class="grid2"><div class="card"><h2>Gráfico de salários</h2><div class="canvasBox"><canvas id="salChart"></canvas></div></div><div class="card"><h2>Histórico</h2><table><thead><tr><th>Mês</th><th>Valor</th><th>Obs.</th><th>Ações</th></tr></thead><tbody>${[...state.salarios].sort((a,b)=>String(b.mes).localeCompare(String(a.mes))).map(s=>`<tr><td><input type="month" value="${s.mes||''}" onchange="updSalario('${s.id}','mes',this.value)"></td><td><input value="${s.valor||0}" onchange="updSalario('${s.id}','valor',num(this.value))"></td><td><input value="${s.obs||''}" onchange="updSalario('${s.id}','obs',this.value)"></td><td><button class="danger" onclick="delSalario('${s.id}')">Excluir</button></td></tr>`).join('')}</tbody></table></div></div>`}
+function addSalario(){saveUndo('salário');state.salarios.unshift({id:uid(),mes:val('salMes'),valor:num(val('salValor')),obs:val('salObs')});save();render()}function updSalario(id,k,v){let s=state.salarios.find(x=>x.id==id);if(s){saveUndo('salário');s[k]=v;save();render()}}function delSalario(id){saveUndo('salário');state.salarios=state.salarios.filter(x=>x.id!=id);save();render()}
+function renderSaidas(){document.getElementById('saidas').innerHTML=`<div class="card"><h2>Última atualização das saídas</h2><p class="muted">Clique em Atualizar última saída atual para gravar data e horário de agora automaticamente. Os campos continuam editáveis se precisar ajustar manualmente.</p><div class="rowform3"><div><label>Data</label><input id="ultSaiData" type="date" value="${(state.ultimaAtualizacaoSaidas&&state.ultimaAtualizacaoSaidas.data)||''}"></div><div><label>Hora</label><input id="ultSaiHora" type="time" value="${(state.ultimaAtualizacaoSaidas&&state.ultimaAtualizacaoSaidas.hora)||''}"></div><div><label>Status</label><input value="${(state.ultimaAtualizacaoSaidas&&state.ultimaAtualizacaoSaidas.data)?'Atualizado em '+state.ultimaAtualizacaoSaidas.data+' às '+(state.ultimaAtualizacaoSaidas.hora||'--'):'Ainda não informado'}" readonly></div><button class="primary" onclick="atualizarUltimaSaidaAgora()">Atualizar última saída atual</button><button class="secondary" onclick="salvarUltimaAtualizacaoSaidas()">Salvar data editada</button></div></div><div class="card"><h2>Saídas</h2><p class="muted">Todo gasto novo aparece primeiro na lista.</p><div class="rowform4"><div><label>Data</label><input id="outData" type="date" value="${today()}"></div><div><label>Categoria</label><select id="outCat">${catOptions()}</select></div><div><label>Descrição</label><input id="outDesc" placeholder="Ex: mercado"></div><div><label>Valor</label><input id="outValor"></div><button class="primary" onclick="addSaida()">Adicionar</button></div></div><div class="card"><h2>Lançamentos</h2><table><thead><tr><th>Data</th><th>Categoria</th><th>Descrição</th><th>Valor</th><th></th></tr></thead><tbody>${state.saidas.map(s=>`<tr><td>${s.data||''}</td><td>${s.categoria||''}</td><td>${s.desc||s.descricao||''}</td><td>${fmt(s.valor)}</td><td><button class="danger" onclick="delSaida('${s.id}')">Excluir</button></td></tr>`).join('')}</tbody></table></div>`}
+function atualizarUltimaSaidaAgora(){let a=agoraLocal();let d=document.getElementById('ultSaiData'),h=document.getElementById('ultSaiHora');if(d)d.value=a.data;if(h)h.value=a.hora;salvarUltimaAtualizacaoSaidas()}
+function salvarUltimaAtualizacaoSaidas(){saveUndo('última atualização das saídas');state.ultimaAtualizacaoSaidas={data:val('ultSaiData'),hora:val('ultSaiHora')};save();render()}
+function addSaida(){saveUndo('saída');state.saidas.unshift({id:uid(),data:val('outData'),categoria:val('outCat'),desc:val('outDesc'),valor:num(val('outValor'))});save();render()}function delSaida(id){saveUndo('saída');state.saidas=state.saidas.filter(x=>x.id!=id);save();render()}
+function renderProjecoes(){let sal=salarioAtual(),tp=totalPrevisto(),pp=pagoProjTotal(),ap=totalAPagar();document.getElementById('projecoes').innerHTML=`<div class="card"><h2>Projeções de gastos fixos e variáveis</h2><div class="rowform"><div><label>Dia</label><input id="prDia"></div><div><label>Categoria</label><select id="prCat">${catOptions()}</select></div><div><label>Descrição</label><input id="prDesc" placeholder="Ex: aluguel"></div><div><label>Valor previsto</label><input id="prPrev"></div><div><label>Pago manual</label><input id="prPago" value="0"></div><button class="primary" onclick="addProj()">Adicionar projeção</button></div></div><div class="grid"><div class="card metric"><small>Limite / salário do mês</small><b>${fmt(sal)}</b></div><div class="card metric"><small>Total previsto nas projeções</small><b>${fmt(tp)}</b></div><div class="card metric"><small>Pago nas projeções</small><b>${fmt(pp)}</b></div></div><div class="card"><h2>Projeções + Dívidas + Acionistas</h2><div class="grid"><div class="metric"><small>Projeções a pagar</small><b>${fmt(totalAPagar())}</b></div><div class="metric"><small>Parcelas de dívidas no mês</small><b>${fmt(parcelasDividasMes())}</b></div><div class="metric"><small>Juros de acionistas/mês</small><b class="bad">${fmt(jurosAcionistasMes())}</b></div><div class="metric"><small>Quanto falta pagar no mês</small><b>${fmt(faltaPagarMes())}</b></div></div><p class="muted">Projeção total de saída do mês: <b>${fmt(totalSaidasPlanejadas())}</b> = somente projeções de despesas, sem duplicar dívidas e acionistas. Já gasto lançado: <b>${fmt(totalGasto())}</b>. Como ficará o mês com o salário: <b class="${resultadoLiquidoPrevisto()<0?'bad':'ok'}">${fmt(resultadoLiquidoPrevisto())}</b>.</p></div><div class="card"><h2>Dicas de corte dentro das projeções</h2>${dicasProjecoes()}</div><div class="card"><h2>Adicionar gasto rápido</h2><p class="muted">Entra em Saídas e automaticamente aparece como pago na categoria.</p><div class="rowform4"><div><label>Data</label><input id="grData" type="date" value="${today()}"></div><div><label>Categoria</label><select id="grCat">${catOptions()}</select></div><div><label>Descrição</label><input id="grDesc" placeholder="Ex: farmácia"></div><div><label>Valor</label><input id="grValor"></div><button class="primary" onclick="addGastoRapido()">Add</button></div></div><div class="card"><h2>Lista editável</h2><table><thead><tr><th>Dia</th><th>Categoria</th><th>Descrição</th><th>Previsto</th><th>Pago auto/manual</th><th>A pagar</th><th></th></tr></thead><tbody>${(()=>{let auto=autoPagosProj();return projListOrdenada().map(p=>{let manual=num(p.pago),autoVal=num(auto[p.id]),pago=manual+autoVal,apg=Math.max(0,num(p.previsto)-pago);return `<tr><td><input value="${projDia(p)}" onchange="updProj('${p.id}','dia',this.value)"></td><td><select onchange="updProj('${p.id}','categoria',this.value)">${catOptions(p.categoria)}</select></td><td><input value="${projDesc(p)}" onchange="updProj('${p.id}','desc',this.value)"></td><td><input value="${p.previsto||0}" onchange="updProj('${p.id}','previsto',num(this.value))"></td><td><b>${fmt(pago)}</b><br><small>auto: ${fmt(autoVal)} | manual: <input style="width:110px" value="${p.pago||0}" onchange="updProj('${p.id}','pago',num(this.value))"></small></td><td>${fmt(apg)}</td><td><button class="danger" onclick="delProj('${p.id}')">Excluir</button></td></tr>`}).join('')})()}</tbody></table></div>`}
+function addProj(){saveUndo('projeção');state.projecoesExcluidas=ensureArray(state.projecoesExcluidas);let cat=val('prCat'),desc=val('prDesc');state.projecoesExcluidas=state.projecoesExcluidas.filter(x=>x!=(cat+'|'+desc).toLowerCase());state.projecoes.push({id:uid(),dia:val('prDia'),categoria:cat,desc:desc,descricao:desc,previsto:num(val('prPrev')),pago:num(val('prPago'))});save();render()}function updProj(id,k,v){let p=state.projecoes.find(x=>x.id==id);if(p){saveUndo('projeção');p[k]=v;if(k==='desc')p.descricao=v;if(k==='descricao')p.desc=v;save();render()}}async function delProj(id){let p=state.projecoes.find(x=>x.id==id);if(!p)return;if(!confirm('Excluir esta projeção?'))return;saveUndo('projeção');state.projecoesExcluidas=ensureArray(state.projecoesExcluidas);let chave=((p.categoria||'')+'|'+(p.descricao||p.desc||'')).toLowerCase();if(chave.trim()!=='|')state.projecoesExcluidas.push(chave);state.projecoes=state.projecoes.filter(x=>x.id!=id);localStorage.setItem('financeiro_familiar',JSON.stringify(state));render();if(docRef){try{await docRef.set(state);syncMsg('Projeção excluída e salva na nuvem.')}catch(e){console.error(e);syncMsg('Projeção excluída localmente. Não consegui salvar na nuvem agora.')}}}function addGastoRapido(){saveUndo('gasto rápido');state.saidas.unshift({id:uid(),data:val('grData'),categoria:val('grCat'),desc:val('grDesc'),valor:num(val('grValor'))});save();render()}function dicasProjecoes(){let sal=salarioAtual(),tp=totalPrevisto(),folga=sal-tp;let msg=`<p><b>Salário/limite:</b> ${fmt(sal)} <b>Total previsto:</b> ${fmt(tp)} <b>Sobra prevista:</b> <span class="${folga<0?'bad':'ok'}">${fmt(folga)}</span></p>`;if(folga>=0)msg+=`<p class="ok"><b>As projeções cabem no limite.</b> Proteja essa sobra e evite aumentar Lazer, chá, compras conforto, compras e Outros.</p>`;else msg+=`<p class="bad"><b>As projeções passam do limite.</b> Corte primeiro compras conforto, chá, Lazer e Outros até reduzir ${fmt(Math.abs(folga))}.</p>`;return msg}
+function renderSonhos(){document.getElementById('sonhos').innerHTML=`<div class="card"><h2>Sonhos</h2><div class="rowform4"><div><label>Nome do sonho</label><input id="sonNome"></div><div><label>Valor Meta</label><input id="sonMeta"></div><div><label>Valor Guardado</label><input id="sonGuardado"></div><div><label>Data Alvo</label><input id="sonData" type="date"></div><button class="primary" onclick="addSonho()">Adicionar</button></div></div><div class="card"><table><thead><tr><th>Sonho</th><th>Valor Meta</th><th>Guardado</th><th>Data Alvo</th><th>%</th><th>Progresso</th><th></th></tr></thead><tbody>${state.sonhos.map(s=>{let pct=num(s.meta)?num(s.guardado)/num(s.meta)*100:0;return `<tr><td><input value="${s.nome||''}" onchange="updSonho('${s.id}','nome',this.value)"></td><td><input value="${s.meta||0}" onchange="updSonho('${s.id}','meta',num(this.value))"></td><td><input value="${s.guardado||0}" onchange="updSonho('${s.id}','guardado',num(this.value))"></td><td><input type="date" value="${s.data||''}" onchange="updSonho('${s.id}','data',this.value)"></td><td>${pct.toFixed(0)}%</td><td><div class="bar"><span style="width:${Math.min(pct,100)}%"></span></div>${fmt(s.guardado)} / ${fmt(s.meta)}</td><td><button class="danger" onclick="delSonho('${s.id}')">Excluir</button></td></tr>`}).join('')}</tbody></table></div>`}
+function sonhoCard(s){let pct=num(s.meta)?num(s.guardado)/num(s.meta)*100:0;return `<div style="margin-bottom:14px"><b>🎯 ${s.nome||'Sonho'}</b><div class="bar"><span style="width:${Math.min(pct,100)}%"></span></div><div>${pct.toFixed(0)}% — ${fmt(s.guardado)} / ${fmt(s.meta)}</div><small class="muted">Meta: ${s.data||'sem data'}</small></div>`}function addSonho(){saveUndo('sonho');state.sonhos.push({id:uid(),nome:val('sonNome'),meta:num(val('sonMeta')),guardado:num(val('sonGuardado')),data:val('sonData')});save();render()}function updSonho(id,k,v){let s=state.sonhos.find(x=>x.id==id);if(s){saveUndo('sonho');s[k]=v;save();render()}}function delSonho(id){saveUndo('sonho');state.sonhos=state.sonhos.filter(x=>x.id!=id);save();render()}
+function saldoAc(a){return num(a.valor)}function jurosAc(a){return saldoAc(a)*num(a.percentual)/100}
+function removerSaidaVinculada(id){state.saidas=(state.saidas||[]).filter(s=>s.vinculoId!==id)}
+function gravarSaidaVinculada(id,categoria,desc,valor,data){state.saidas=state.saidas||[];let existente=state.saidas.find(s=>s.vinculoId===id);if(existente){existente.categoria=categoria;existente.desc=desc;existente.valor=num(valor);existente.data=data||today()}else{state.saidas.unshift({id:uid(),vinculoId:id,data:data||today(),categoria,desc,valor:num(valor)})}if(!state.categorias.includes(categoria))state.categorias.push(categoria)}
+function renderAcionistas(){let total=state.acionistas.reduce((a,x)=>a+saldoAc(x),0),juros=state.acionistas.reduce((a,x)=>a+jurosAc(x),0);document.getElementById('acionistas').innerHTML=`<div class="grid"><div class="card metric"><small>Soma das dívidas</small><b>${fmt(total)}</b></div><div class="card metric"><small>Total de juros/mês</small><b class="bad">${fmt(juros)}</b></div></div><div class="card"><h2>Acionistas / dívidas com juros</h2><div class="rowform4"><div><label>Nome</label><input id="acNome"></div><div><label>Valor da dívida</label><input id="acValor"></div><div><label>% ao mês</label><input id="acPct"></div><div><label>Data pagamento</label><input id="acDia" type="date"></div><button class="primary" onclick="addAc()">Adicionar</button></div></div><div class="card"><table><thead><tr><th>Nome</th><th>Valor original</th><th>%</th><th>Juros/mês</th><th>Data Pgto</th><th>Pago</th><th></th></tr></thead><tbody>${state.acionistas.map(a=>`<tr><td><input value="${a.nome||''}" onchange="updAc('${a.id}','nome',this.value)"></td><td><input value="${a.valor||0}" onchange="updAc('${a.id}','valor',num(this.value))"></td><td><input style="width:70px" value="${a.percentual||0}" onchange="updAc('${a.id}','percentual',num(this.value))"></td><td>${fmt(jurosAc(a))}</td><td><input type="date" value="${a.dia||''}" onchange="updAc('${a.id}','dia',this.value)"></td><td><label><input type='checkbox' ${a.pago?'checked':''} onchange="marcarAcPago('${a.id}',this.checked)"> Pago</label></td><td><button class="danger" onclick="delAc('${a.id}')">Excluir</button></td></tr>`).join('')}</tbody></table><p class="muted">Ao marcar pago, entra uma única vez em Saídas na categoria Acionistas. Não abate do capital e não duplica se clicar de novo.</p></div>`}
+function addAc(){saveUndo('acionista');state.acionistas.push({id:uid(),nome:val('acNome'),valor:num(val('acValor')),percentual:num(val('acPct')),dia:val('acDia'),pago:false,pagamentoSaidaId:''});save();render()}
+function updAc(id,k,v){let a=state.acionistas.find(x=>x.id==id);if(a){saveUndo('acionista');a[k]=v;if(a.pago){gravarSaidaVinculada('ac-'+id,'Acionistas','Pagamento juros acionista - '+(a.nome||''),jurosAc(a),a.dia||today())}save();render()}}
+function marcarAcPago(id,checked){let a=state.acionistas.find(x=>x.id==id);if(!a)return;saveUndo('pagamento acionista');a.pago=!!checked;if(a.pago){state.catLimits=state.catLimits||{};if(!num(state.catLimits['Acionistas']))state.catLimits['Acionistas']=8400;gravarSaidaVinculada('ac-'+id,'Acionistas','Pagamento juros acionista - '+(a.nome||''),jurosAc(a),a.dia||today())}else{removerSaidaVinculada('ac-'+id)}save();render()}
+function delAc(id){saveUndo('acionista');removerSaidaVinculada('ac-'+id);state.acionistas=state.acionistas.filter(x=>x.id!=id);save();render()}
+function renderDividas(){let total=state.dividas.reduce((a,d)=>a+num(d.valorParcela),0);document.getElementById('dividas').innerHTML=`<div class="card metric"><small>Total de parcelas cadastradas</small><b>${fmt(total)}</b></div><div class="card"><h2>Dívidas parceladas</h2><div class="rowform4"><div><label>Nome</label><input id="dvNome"></div><div><label>Valor parcela</label><input id="dvParc"></div><div><label>Nº parcelas</label><input id="dvTotal"></div><div><label>Data pagamento</label><input id="dvData" type="date"></div><button class="primary" onclick="addDivida()">Adicionar</button></div></div><div class="card"><table><thead><tr><th>Nome</th><th>Valor</th><th>Nº parcelas</th><th>Data Pgto</th><th>Pago</th><th></th></tr></thead><tbody>${state.dividas.map(d=>`<tr><td><input value="${d.nome||''}" onchange="updDivida('${d.id}','nome',this.value)"></td><td><input value="${d.valorParcela||0}" onchange="updDivida('${d.id}','valorParcela',num(this.value))"></td><td><input value="${d.totalParcelas||0}" onchange="updDivida('${d.id}','totalParcelas',num(this.value))"></td><td><input type='date' value='${d.dataPagamento||""}' onchange="updDivida('${d.id}','dataPagamento',this.value)"></td><td><label><input type='checkbox' ${d.pago?'checked':''} onchange="marcarDividaPago('${d.id}',this.checked)"> Pago</label></td><td><button class="danger" onclick="delDivida('${d.id}')">Excluir</button></td></tr>`).join('')}</tbody></table><p class="muted">Ao marcar pago, entra uma única vez em Saídas na categoria Dívidas. Não soma de novo, não aumenta parcelas pagas e não abate nada.</p></div>`}
+function addDivida(){saveUndo('dívida');state.dividas.push({id:uid(),nome:val('dvNome'),dataPagamento:val('dvData'),valorParcela:num(val('dvParc')),totalParcelas:num(val('dvTotal')),pago:false,pagamentoSaidaId:''});save();render()}
+function updDivida(id,k,v){let d=state.dividas.find(x=>x.id==id);if(d){saveUndo('dívida');d[k]=v;if(d.pago){gravarSaidaVinculada('dv-'+id,'Dívidas','Parcela dívida - '+(d.nome||''),num(d.valorParcela),d.dataPagamento||today())}save();render()}}
+function marcarDividaPago(id,checked){let d=state.dividas.find(x=>x.id==id);if(!d)return;saveUndo('pagamento de parcela');d.pago=!!checked;if(d.pago){state.catLimits=state.catLimits||{};if(!num(state.catLimits['Dívidas']))state.catLimits['Dívidas']=9500;gravarSaidaVinculada('dv-'+id,'Dívidas','Parcela dívida - '+(d.nome||''),num(d.valorParcela),d.dataPagamento||today())}else{removerSaidaVinculada('dv-'+id)}save();render()}
+function delDivida(id){saveUndo('dívida');removerSaidaVinculada('dv-'+id);state.dividas=state.dividas.filter(x=>x.id!=id);save();render()}
+function renderPatrimonio(){let total=state.patrimonio.reduce((a,p)=>a+num(p.valor),0);document.getElementById('patrimonio').innerHTML=`<div class="card metric"><small>Total patrimônio</small><b>${fmt(total)}</b></div><div class="card"><h2>Patrimônio</h2><div class="rowform3"><div><label>Bem</label><input id="ptNome"></div><div><label>Valor</label><input id="ptValor"></div><div><label>Observação</label><input id="ptObs"></div><button class="primary" onclick="addPat()">Adicionar</button></div></div><div class="card"><table><thead><tr><th>Bem</th><th>Valor</th><th>Obs.</th><th></th></tr></thead><tbody>${state.patrimonio.map(p=>`<tr><td><input value="${p.nome||''}" onchange="updPat('${p.id}','nome',this.value)"></td><td><input value="${p.valor||0}" onchange="updPat('${p.id}','valor',num(this.value))"></td><td><input value="${p.obs||''}" onchange="updPat('${p.id}','obs',this.value)"></td><td><button class="danger" onclick="delPat('${p.id}')">Excluir</button></td></tr>`).join('')}</tbody></table></div>`}
+function addPat(){saveUndo('patrimônio');state.patrimonio.push({id:uid(),nome:val('ptNome'),valor:num(val('ptValor')),obs:val('ptObs')});save();render()}function updPat(id,k,v){let p=state.patrimonio.find(x=>x.id==id);if(p){saveUndo('patrimônio');p[k]=v;save();render()}}function delPat(id){saveUndo('patrimônio');state.patrimonio=state.patrimonio.filter(x=>x.id!=id);save();render()}
+function renderEmpresa(){let e=state.empresa||{};let valorRua=num(e.valorRua??e.capitalAtivo),pctCobrado=num(e.jurosCobradoPct),devoInv=num(e.dividaInvestidores),pctPago=num(e.pctPagoInvestidores);let bruto=valorRua*pctCobrado/100;let jurosInv=devoInv*pctPago/100;let sobra=bruto-jurosInv;let pctLucro=valorRua?sobra/valorRua*100:0;document.getElementById('empresa').innerHTML=`<div class="grid"><div class="card metric"><small>Valor na rua</small><b>${fmt(valorRua)}</b></div><div class="card metric"><small>Bruto no mês</small><b>${fmt(bruto)}</b></div><div class="card metric"><small>Juros investidores/mês</small><b>${fmt(jurosInv)}</b></div><div class="card metric"><small>Sobra / lucro do mês</small><b class="${sobra<0?'bad':'ok'}">${fmt(sobra)}</b></div><div class="card metric"><small>% lucro sobre capital</small><b class="${pctLucro<0?'bad':'ok'}">${pctLucro.toFixed(2)}%</b></div></div><div class="card"><h2>Empresa de Empréstimos</h2><p class="muted">Bruto = valor na rua × juros cobrado. Juros investidores = valor devido aos investidores × porcentagem paga. Sobra = bruto - juros dos investidores.</p><div class="rowform4"><div><label>Valor que tenho na rua</label><input id="emRua" value="${valorRua||0}"></div><div><label>Juros que cobro ao mês (%)</label><input id="emCobro" value="${pctCobrado||0}"></div><div><label>Quanto devo a investidores</label><input id="emDevo" value="${devoInv||0}"></div><div><label>% que pago aos investidores</label><input id="emPago" value="${pctPago||0}"></div><button class="primary" onclick="salvarEmpresa()">Salvar</button></div></div>`}function salvarEmpresa(){saveUndo('empresa');state.empresa={valorRua:num(val('emRua')),jurosCobradoPct:num(val('emCobro')),dividaInvestidores:num(val('emDevo')),pctPagoInvestidores:num(val('emPago'))};save();render()}
+
+function gastosDaCategoria(cat){
+  return (state.saidas||[]).filter(s=>s.categoria===cat);
+}
+function toggleRelCategoria(cat){
+  window.relCatAberta = (window.relCatAberta===cat ? '' : cat);
+  renderRelatorios();
+}
+function updSaidaRel(id,k,v){
+  let s=(state.saidas||[]).find(x=>x.id==id);
+  if(!s)return;
+  saveUndo('editar gasto no relatório');
+  if(k==='valor')s.valor=num(v);
+  else if(k==='data')s.data=v;
+  else if(k==='desc'){s.desc=v;s.descricao=v;}
+  save();
+  render();
+}
+function delSaidaRel(id){
+  if(!confirm('Excluir este lançamento?'))return;
+  saveUndo('excluir gasto no relatório');
+  state.saidas=(state.saidas||[]).filter(x=>x.id!=id);
+  save();
+  render();
+}
+function detalhesRelCategoria(cat){
+  const lista=gastosDaCategoria(cat);
+  if(!lista.length)return `<tr><td colspan="4"><p class="muted">Nenhum lançamento nesta categoria.</p></td></tr>`;
+  return lista.map(s=>`<tr>
+    <td><input type="date" value="${s.data||''}" onchange="updSaidaRel('${s.id}','data',this.value)"></td>
+    <td><input value="${s.desc||s.descricao||''}" onchange="updSaidaRel('${s.id}','desc',this.value)"></td>
+    <td><input value="${s.valor||0}" onchange="updSaidaRel('${s.id}','valor',this.value)"></td>
+    <td><button class="danger" onclick="delSaidaRel('${s.id}')">Excluir</button></td>
+  </tr>`).join('');
+}
+
+function renderRelatorios(){let r=resumoMesAtual();let hist=ensureArray(state.historico).sort((a,b)=>String(a.mes).localeCompare(String(b.mes)));let relCat=window.relCatAberta||'';document.getElementById('relatorios').innerHTML=`<div class="grid"><div class="card metric"><small>Entrou no mês</small><b>${fmt(r.salario)}</b></div><div class="card metric"><small>Saiu lançado</small><b>${fmt(r.gasto)}</b></div><div class="card metric"><small>Total projetado a sair</small><b>${fmt(r.totalProjetado)}</b></div><div class="card metric"><small>Sobra prevista</small><b class="${r.sobra<0?'bad':'ok'}">${fmt(r.sobra)}</b></div></div><div class="card"><h2>Resumo mensal</h2><p class="muted">Use este botão no fechamento do mês para guardar o resumo e comparar com os próximos meses.</p><button class="primary" onclick="fecharResumoMes()">Registrar resumo deste mês</button> <button class="secondary" onclick="fecharMesManual()">Fechar mês e zerar pagamentos</button></div><div class="grid2"><div class="card"><h2>Gráfico do mês atual</h2><div class="canvasBox"><canvas id="relMesChart"></canvas></div></div><div class="card"><h2>Comparativo mensal</h2><div class="canvasBox"><canvas id="relHistChart"></canvas></div></div></div><div class="card"><h2>Histórico de fechamentos</h2>${hist.length?`<table><thead><tr><th>Mês</th><th>Entrou</th><th>Saiu lançado</th><th>Projetado sair</th><th>Sobra</th></tr></thead><tbody>${hist.map(h=>`<tr><td>${h.mes}</td><td>${fmt(h.salario)}</td><td>${fmt(h.gasto)}</td><td>${fmt(h.totalProjetado)}</td><td class="${num(h.sobra)<0?'bad':'ok'}">${fmt(h.sobra)}</td></tr>`).join('')}</tbody></table>`:'<p class="muted">Nenhum mês fechado ainda.</p>'}</div><div class="card"><h2>Resumo por categoria</h2><p class="muted">Clique em uma categoria para ver, editar ou excluir os lançamentos dela.</p><table><thead><tr><th>Categoria</th><th>Gasto</th><th>Limite</th><th>%</th></tr></thead><tbody>${despesasPorCategoria().map(x=>`<tr style="cursor:pointer" onclick="toggleRelCategoria('${String(x.categoria).replace(/'/g,"\\'")}')"><td><b>${relCat===x.categoria?'▼':'▶'} ${x.categoria}</b></td><td>${fmt(x.gasto)}</td><td>${x.temLimite?fmt(x.limite):'Sem limite'}</td><td class="${!x.temLimite?'warn':x.pct>100?'bad':x.pct>80?'warn':'ok'}">${x.temLimite?x.pct.toFixed(0)+'%':'Configurar'}</td></tr>${relCat===x.categoria?`<tr><td colspan="4"><div class="card" style="margin:8px 0;background:#f8fafc"><h3>Lançamentos de ${x.categoria}</h3><table><thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Ação</th></tr></thead><tbody>${detalhesRelCategoria(x.categoria)}</tbody></table></div></td></tr>`:''}`).join('')}</tbody></table></div>`}
+function renderCategorias(){let falt=categoriasProjetadasFaltando();document.getElementById('categorias').innerHTML=`<div class="card"><h2>Categoria / Limite</h2><p class="muted">O limite mensal pode ser preenchido manualmente ou copiado automaticamente da aba Projeções. Quando houver projeção em uma categoria, o gráfico principal usa esse valor como limite.</p><div class="actions" style="margin-bottom:12px"><button class="primary" onclick="conciliarLimitesComProjecoes()">Copiar limites da aba Projeções</button></div>${falt.length?`<p class="warn"><b>Atenção:</b> existem categorias nas projeções que não estavam cadastradas aqui: ${falt.join(', ')}. Clique em copiar limites para conciliar.</p>`:''}<div class="rowform3"><div><label>Nova categoria</label><input id="catNova"></div><div><label>Limite mensal</label><input id="catLimite" placeholder="Ex: 2500"></div><button class="primary" onclick="addCat()">Adicionar</button></div></div><div class="card"><table><thead><tr><th>Categoria</th><th>Limite mensal</th><th>Previsto nas projeções</th><th>Ações</th></tr></thead><tbody>${state.categorias.map(c=>`<tr><td><input value="${c}" onchange="updCat('${c}',this.value)"></td><td><input value="${(state.catLimits||{})[c]||0}" onchange="updCatLimit('${c}',num(this.value))"></td><td><b>${fmt(previstoCategoria(c))}</b></td><td><button class="danger" onclick="delCat('${c}')">Excluir</button></td></tr>`).join('')}</tbody></table></div>`}function addCat(){saveUndo('categoria');let c=val('catNova');if(c&&!state.categorias.includes(c)){state.deletedCategories=(state.deletedCategories||[]).filter(x=>x!==c);state.categorias.push(c);state.catLimits=state.catLimits||{};state.catLimits[c]=num(val('catLimite'))}save();render()}function updCat(old,nv){saveUndo('categoria');state.catLimits=state.catLimits||{};if(old!=nv){state.catLimits[nv]=state.catLimits[old]||0;delete state.catLimits[old]}state.categorias=state.categorias.map(c=>c==old?nv:c);state.saidas.forEach(s=>{if(s.categoria==old)s.categoria=nv});state.projecoes.forEach(p=>{if(p.categoria==old)p.categoria=nv});save();render()}function updCatLimit(c,v){saveUndo('categoria');state.catLimits=state.catLimits||{};state.catLimits[c]=v;save();render()}function delCat(c){
+ if(!confirm('Excluir a categoria "'+c+'"? Ela será removida da lista, dos limites, das projeções e do gráfico. Os lançamentos antigos continuam salvos no histórico como registro.'))return;
+ saveUndo('categoria excluída');
+ state.deletedCategories=Array.isArray(state.deletedCategories)?state.deletedCategories:[];
+ if(!state.deletedCategories.includes(c))state.deletedCategories.push(c);
+ state.categorias=[...new Set((state.categorias||[]).filter(x=>x&&x!=c))];
+ state.catLimits=state.catLimits||{};
+ delete state.catLimits[c];
+ state.projecoes=(state.projecoes||[]).filter(p=>p.categoria!==c);
+ state.saidas=(state.saidas||[]).map(s=>s.categoria===c?{...s,categoria:'Categoria excluída'}:s);
+ criarBackupAutomatico('Categoria excluída: '+c);
+ save(true).then(()=>{render();syncMsg('Categoria excluída e salva no Firebase.');});
+}
+
+function prepararDadosIA(){
+  const auto=autoPagosProj();
+  const projecoesDetalhadas=projListOrdenada().map(p=>{
+    const manual=num(p.pago), automatico=num(auto[p.id]), pago=manual+automatico;
+    return {dia:projDia(p),categoria:p.categoria,descricao:projDesc(p),previsto:num(p.previsto),pagoManual:manual,pagoAutomatico:automatico,aPagar:Math.max(0,num(p.previsto)-pago)};
+  });
+  return {
+    dataAnalise:new Date().toISOString(),
+    mes:month(),
+    resumo:{
+      salario:salarioAtual(),
+      gastoLancado:totalGasto(),
+      totalPrevisto:totalPrevisto(),
+      totalAPagar:totalAPagar(),
+      parcelasDividasMes:parcelasDividasMes(),
+      jurosAcionistasMes:jurosAcionistasMes(),
+      faltaPagarMes:faltaPagarMes(),
+      resultadoLiquidoPrevisto:resultadoLiquidoPrevisto(),
+      aindaPodeGastar:quantoPossoGastarTotal()
+    },
+    categorias:despesasPorCategoria().map(x=>({categoria:x.categoria,gasto:x.gasto,limite:x.limite,restante:x.restante,percentual:Number((x.pct||0).toFixed(2))})),
+    gastosForaProjecao:gastosForaProjecao(),
+    proximosPagamentos:proximosPagamentos().map(p=>({data:fmtDataPagamento(p.data),tipo:p.tipo,categoria:p.categoria,descricao:p.descricao,aPagar:p.apagar})),
+    projecoes:projecoesDetalhadas,
+    acionistas:(state.acionistas||[]).map(a=>({nome:a.nome,valor:num(a.valor),percentual:num(a.percentual),jurosMes:jurosAc(a),dataPagamento:a.dia,pago:!!a.pago})),
+    dividas:(state.dividas||[]).map(d=>({nome:d.nome,valorParcela:num(d.valorParcela),totalParcelas:num(d.totalParcelas),dataPagamento:d.dataPagamento,pago:!!d.pago})),
+    sonhos:(state.sonhos||[]).map(s=>({nome:s.nome,meta:num(s.meta||s.valor),guardado:num(s.guardado),data:s.data})),
+    patrimonio:(state.patrimonio||[]).map(p=>({nome:p.nome,valor:num(p.valor),obs:p.obs})),
+    empresa:state.empresa||{},
+    historico:ensureArray(state.historico).slice(-12)
+  };
+}
+function htmlSeguro(txt){
+  return String(txt||'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<b>$1</b>')
+    .replace(/\n/g,'<br>');
+}
+function renderIA(){
+  const el=document.getElementById('ia');
+  if(!el)return;
+  el.innerHTML=`<div class="card iaBox"><h2>🧠 Consultor Financeiro IA</h2><p class="muted">A IA lê os dados reais do sistema: salário, saídas, projeções, acionistas, dívidas, empresa, sonhos e histórico. A chave fica protegida no Netlify.</p><div class="iaActions"><button onclick="consultarIA('analise')">📊 Analisar meu mês</button><button onclick="consultarIA('dividas')">🎯 Como sair das dívidas</button><button onclick="consultarIA('prioridade')">💰 Qual dívida quitar primeiro</button><button onclick="consultarIA('projecao')">📈 Projeção 12 meses</button></div><div class="iaChat"><div><label style="color:#e5eefb">Pergunta personalizada</label><textarea id="iaPergunta" placeholder="Ex: como sair dessa situação este mês sem atrasar acionistas?"></textarea></div><button class="primary" onclick="consultarIA('pergunta')">Enviar pergunta</button></div><div id="iaStatus" class="muted" style="margin-top:10px">Pronto para analisar.</div><div id="iaResultado" class="iaResult">Clique em um botão para gerar a análise.</div></div>`;
+}
+async function consultarIA(tipo){
+  const status=document.getElementById('iaStatus');
+  const out=document.getElementById('iaResultado');
+  if(status)status.textContent='Analisando com GPT... aguarde alguns segundos.';
+  if(out)out.innerHTML='⏳ Gerando diagnóstico financeiro...';
+  const pergunta=val('iaPergunta');
+  const dados=prepararDadosIA();
+  try{
+    const r=await fetch('/.netlify/functions/analise-financeira',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({tipo,pergunta,dados})
+    });
+    const j=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(j.erro||j.message||'Falha na função de IA.');
+    if(status)status.textContent='Análise concluída.';
+    if(out)out.innerHTML=htmlSeguro(j.resultado||'Sem resposta da IA.');
+  }catch(e){
+    console.error(e);
+    if(status)status.textContent='Erro na IA.';
+    if(out)out.innerHTML='Não consegui chamar a IA agora.<br><br>Confira se a variável OPENAI_API_KEY está criada no Netlify e se você fez um novo deploy depois de adicionar a função.<br><br>Detalhe: '+htmlSeguro(e.message||e);
+  }
+}
+
+function renderBackup(){document.getElementById('backup').innerHTML=`<div class="card"><h2>Backup</h2><p class="muted">Ao importar, os números atualizam na hora e o backup é salvo também no Firebase. O backup exportado leva junto a data/hora da última atualização registrada. Use Desfazer se importar/apagar algo por engano.</p><div class="actions"><button class="primary" onclick="exportar()">Exportar JSON</button><button class="secondary" onclick="document.getElementById('imp').click()">Importar JSON</button><button class="secondary" onclick="desfazerUltimaAcao()">↶ Desfazer última ação</button></div><input type="file" id="imp" accept="application/json,.json" style="display:none" onchange="importar(event)"><textarea id="backupText" rows="6" placeholder="Ou cole o conteúdo do backup JSON aqui" style="margin-top:12px"></textarea><button class="secondary" onclick="importarTexto()" style="margin-top:8px">Importar texto colado</button><p id="backupMsg" class="muted"></p></div>`}
+function exportar(){let payload={...state,backupGeradoEm:new Date().toISOString(),ultimaAtualizacao:state.ultimaAtualizacao||{data:'',hora:''}};let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));a.download='backup-financeiro-'+today()+'.json';a.click()}
+async function aplicarBackup(obj){try{saveUndo('backup importado');state=normalize(obj);criarBackupAutomatico('Importação de backup');localStorage.setItem('financeiro_familiar',JSON.stringify(state));render();syncMsg('Backup importado. Salvando na nuvem...');if(docRef){await docRef.set(state);syncMsg('Backup importado e salvo na nuvem.')}let m=document.getElementById('backupMsg');if(m)m.textContent='Backup importado com sucesso, salvo no Firebase e registrado nos backups automáticos.';}catch(e){console.error(e);alert('Não consegui importar esse backup. Verifique se o arquivo é JSON válido do sistema.')}}
+function importar(ev){let f=ev.target.files&&ev.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{aplicarBackup(JSON.parse(r.result))}catch(e){alert('Arquivo de backup inválido.')}};r.readAsText(f);ev.target.value=''}
+function importarTexto(){try{aplicarBackup(JSON.parse(val('backupText')))}catch(e){alert('Texto de backup inválido.')}}
+function val(id){let e=document.getElementById(id);return e?e.value:''}
+function renderCharts(){try{let cat=document.getElementById('catChart');if(cat){if(charts.cat)charts.cat.destroy();let d=despesasPorCategoria().filter(x=>x.temLimite);let pago=d.map(x=>Math.min(num(x.gasto),num(x.limite)));let restante=d.map(x=>Math.max(0,num(x.limite)-num(x.gasto)));let excesso=d.map(x=>Math.max(0,num(x.gasto)-num(x.limite)));charts.cat=new Chart(cat,{type:'bar',data:{labels:d.map(x=>x.categoria),datasets:[{label:'Pago',data:pago,backgroundColor:'#08796f',stack:'limite'},{label:'Restante do limite',data:restante,backgroundColor:'#e5e7eb',stack:'limite'},{label:'Excesso',data:excesso,backgroundColor:'#b91c1c',stack:'limite'}]},options:{responsive:true,plugins:{legend:{position:'bottom'},tooltip:{callbacks:{label:function(ctx){let item=d[ctx.dataIndex]||{};if(ctx.dataset.label==='Pago')return 'Pago: '+fmt(item.gasto)+' / Limite: '+fmt(item.limite);if(ctx.dataset.label==='Restante do limite')return 'Ainda pode gastar: '+fmt(Math.max(0,item.limite-item.gasto));return 'Passou do limite: '+fmt(Math.max(0,item.gasto-item.limite));}}}},scales:{x:{stacked:true,ticks:{autoSkip:false,maxRotation:60,minRotation:45}},y:{stacked:true,beginAtZero:true}}}})}let sc=document.getElementById('salChart');if(sc){if(charts.sal)charts.sal.destroy();let s=[...state.salarios].sort((a,b)=>String(a.mes).localeCompare(String(b.mes)));charts.sal=new Chart(sc,{type:'line',data:{labels:s.map(x=>x.mes),datasets:[{label:'Salário',data:s.map(x=>num(x.valor)),tension:.25}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}
+let rm=document.getElementById('relMesChart');if(rm){if(charts.relMes)charts.relMes.destroy();let r=resumoMesAtual();charts.relMes=new Chart(rm,{type:'bar',data:{labels:['Entrou','Saiu lançado','Projetado sair','Sobra'],datasets:[{label:'Mês atual',data:[r.salario,r.gasto,r.totalProjetado,r.sobra]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}})}
+let rh=document.getElementById('relHistChart');if(rh){if(charts.relHist)charts.relHist.destroy();let h=ensureArray(state.historico).sort((a,b)=>String(a.mes).localeCompare(String(b.mes)));charts.relHist=new Chart(rh,{type:'line',data:{labels:h.map(x=>x.mes),datasets:[{label:'Entrou',data:h.map(x=>num(x.salario)),tension:.25},{label:'Saiu',data:h.map(x=>num(x.totalProjetado||x.gasto)),tension:.25},{label:'Sobra',data:h.map(x=>num(x.sobra)),tension:.25}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}})}
+}catch(e){console.warn(e)}}
+setupNav();load();
+</script>
+</body></html>
