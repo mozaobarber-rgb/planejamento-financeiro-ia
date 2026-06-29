@@ -1,0 +1,16 @@
+SINCRONIZAÇÃO REAL PC + CELULAR
+
+Correções:
+- Backup JSON colocado dentro do sistema.
+- Firebase restaurado da versão funcional.
+- Tarefas corrigidas no JavaScript original, sem painel paralelo.
+- Registrar, marcar como feito, editar e excluir salvam no DB principal.
+- Ao salvar em um aparelho, o outro deve receber ao atualizar a página.
+- Botão "Forçar sincronização" envia o backup para a nuvem.
+
+Após subir:
+1. Abra no celular.
+2. Vá em Tarefas.
+3. Clique em Forçar sincronização.
+4. Atualize o PC.
+5. Teste marcar tarefa como feita e veja no outro aparelho após atualizar.

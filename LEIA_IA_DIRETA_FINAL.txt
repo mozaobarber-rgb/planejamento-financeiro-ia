@@ -1,0 +1,21 @@
+IA DIRETA FINAL
+
+Correção feita:
+- Removidas/neutralizadas chamadas antigas para /.netlify/functions.
+- Removido backend/Netlify Functions.
+- Uma única IA direta para:
+  1. refeição por texto
+  2. prato por foto
+- A chave OpenAI é colada dentro da aba Alimentação e salva só neste aparelho.
+
+Como usar:
+1. Suba o ZIP normalmente no Netlify.
+2. Abra Alimentação.
+3. Cole sua OPENAI_API_KEY no campo da IA.
+4. Clique em Salvar chave.
+5. Use texto ou foto.
+6. Confirme para adicionar na alimentação.
+
+Se der erro:
+- Agora não deve aparecer mais "Unexpected token '<'".
+- O erro real será mostrado na tela.

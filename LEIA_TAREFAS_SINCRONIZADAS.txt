@@ -1,0 +1,15 @@
+TAREFAS SINCRONIZADAS PC + CELULAR
+
+Esta versão usa o backup do celular e reforça as tarefas para serem gravadas no objeto principal do site.
+
+Como testar:
+1. Suba este ZIP no Netlify.
+2. Abra no celular.
+3. Cadastre uma tarefa e clique em "Forçar sincronização".
+4. Abra/atualize no PC.
+5. A tarefa deve aparecer.
+
+Se não aparecer:
+- O Firebase não está salvando/carregando no outro aparelho.
+- Verifique regras do Firestore.
+- Verifique se celular e PC estão abrindo exatamente o mesmo link do Netlify.

@@ -1,0 +1,491 @@
+{
+  "mealTimes": [
+    "09:00",
+    "12:00",
+    "15:00",
+    "18:00",
+    "21:00"
+  ],
+  "gym": {
+    "2026-06-09": {},
+    "2026-06-08": {
+      "Seg": {
+        "obs": "12"
+      }
+    }
+  },
+  "lastMonth": "2026-06",
+  "sun": {
+    "2026-06-09": {},
+    "2026-06-08": {}
+  },
+  "foodCustom": {
+    "whwy caixinha": {
+      "g": 2,
+      "c": 8,
+      "unit": "1",
+      "k": 100,
+      "p": 15
+    },
+    "almoco": {
+      "c": 35,
+      "g": 17,
+      "p": 30,
+      "k": 450,
+      "unit": "1"
+    }
+  },
+  "profile": {
+    "water": 3,
+    "goalWeight": 80,
+    "height": 1.78,
+    "protein": 160,
+    "carbs": 320,
+    "fat": 72,
+    "calories": 2568,
+    "name": "Daniel",
+    "bf": 18
+  },
+  "sleep": {
+    "2026-06-08": {},
+    "2026-06-09": {}
+  },
+  "measures": [],
+  "dailyBackups": {
+    "2026-06-12": {
+      "snapshot": {
+        "foodCustom": {},
+        "profile": {
+          "protein": 160,
+          "fat": 80,
+          "goalWeight": 90,
+          "water": 3,
+          "bf": 18,
+          "carbs": 320,
+          "name": "Daniel",
+          "height": 1.78
+        },
+        "mealTimes": [
+          "09:00",
+          "12:00",
+          "15:00",
+          "18:00",
+          "21:00"
+        ],
+        "lastMonth": "2026-06",
+        "gym": {},
+        "sun": {},
+        "avatar": {
+          "style": "auto"
+        },
+        "weights": [],
+        "measures": [],
+        "sleep": {},
+        "dailyBackups": {},
+        "wheel": [],
+        "supplements": {},
+        "exams": [],
+        "loads": [],
+        "cardio": {},
+        "meals": {},
+        "tasks": [],
+        "lastSaved": "",
+        "monthlyReports": {}
+      },
+      "created": "12/06/2026, 11:17:15"
+    },
+    "2026-06-13": {
+      "snapshot": {
+        "updatedAtMs": 1781358272872,
+        "sleep": {
+          "2026-06-09": {},
+          "2026-06-08": {}
+        },
+        "measures": [],
+        "dailyBackups": {
+          "2026-06-12": {
+            "created": "12/06/2026, 11:17:15",
+            "snapshot": {
+              "meals": {},
+              "tasks": [],
+              "lastSaved": "",
+              "monthlyReports": {},
+              "supplements": {},
+              "wheel": [],
+              "loads": [],
+              "exams": [],
+              "cardio": {},
+              "avatar": {
+                "style": "auto"
+              },
+              "weights": [],
+              "dailyBackups": {},
+              "measures": [],
+              "sleep": {},
+              "foodCustom": {},
+              "profile": {
+                "bf": 18,
+                "fat": 80,
+                "protein": 160,
+                "goalWeight": 90,
+                "water": 3,
+                "carbs": 320,
+                "name": "Daniel",
+                "height": 1.78
+              },
+              "mealTimes": [
+                "09:00",
+                "12:00",
+                "15:00",
+                "18:00",
+                "21:00"
+              ],
+              "sun": {},
+              "gym": {},
+              "lastMonth": "2026-06"
+            }
+          }
+        },
+        "weights": [
+          {
+            "value": 70,
+            "date": "2026-06-12"
+          },
+          {
+            "value": 70,
+            "date": "2026-06-12"
+          },
+          {
+            "value": 70,
+            "date": "2026-06-12"
+          },
+          {
+            "value": 70,
+            "date": "2026-06-12"
+          },
+          {
+            "date": "2026-06-12",
+            "value": 70
+          },
+          {
+            "value": 70,
+            "date": "2026-06-12"
+          }
+        ],
+        "avatar": {
+          "style": "auto"
+        },
+        "lastMonth": "2026-06",
+        "gym": {
+          "2026-06-09": {},
+          "2026-06-08": {
+            "Seg": {
+              "obs": "12"
+            }
+          }
+        },
+        "sun": {
+          "2026-06-09": {},
+          "2026-06-08": {}
+        },
+        "mealTimes": [
+          "09:00",
+          "12:00",
+          "15:00",
+          "18:00",
+          "21:00"
+        ],
+        "profile": {
+          "calories": 2568,
+          "height": 1.78,
+          "name": "Daniel",
+          "water": 3,
+          "goalWeight": 80,
+          "fat": 72,
+          "protein": 160,
+          "bf": 18,
+          "carbs": 320
+        },
+        "foodCustom": {
+          "whwy caixinha": {
+            "unit": "1",
+            "p": 15,
+            "k": 100,
+            "c": 8,
+            "g": 2
+          },
+          "almoco": {
+            "k": 450,
+            "p": 30,
+            "unit": "1",
+            "g": 17,
+            "c": 35
+          }
+        },
+        "monthlyReports": {},
+        "lastSaved": "13/06/2026, 10:44:32",
+        "tasks": [
+          {
+            "priority": "Média",
+            "date": "2026-06-13",
+            "end": "18:00",
+            "id": "mqbd2omnpxl5w",
+            "obs": "",
+            "title": "festa",
+            "done": false,
+            "start": "11:00"
+          },
+          {
+            "title": "Festa Sopfia",
+            "start": "18:30",
+            "done": false,
+            "end": "21:00",
+            "obs": "",
+            "id": "mqbdaprzousp9",
+            "priority": "Alta",
+            "date": "2026-06-20"
+          }
+        ],
+        "meals": {
+          "2026-06-13": {
+            "items": [
+              {
+                "k": 1050,
+                "p": 70,
+                "unit": "manual",
+                "id": "mqblmyhcxl6gg",
+                "qtd": 1,
+                "name": "Caldo",
+                "c": 200,
+                "g": 8
+              }
+            ],
+            "check": {},
+            "water": 0
+          },
+          "2026-06-12": {
+            "water": 0.5,
+            "items": [
+              {
+                "unit": "1",
+                "k": 100,
+                "p": 15,
+                "id": "mqbdzb7j9j67l",
+                "name": "whwy caixinha",
+                "qtd": 1,
+                "g": 2,
+                "c": 8
+              },
+              {
+                "id": "mqbdzj24ry0fd",
+                "unit": "1",
+                "p": 15,
+                "k": 100,
+                "g": 2,
+                "c": 8,
+                "qtd": 1,
+                "name": "whwy caixinha"
+              },
+              {
+                "id": "mqbe03ns6afvq",
+                "k": 32,
+                "p": 0.7,
+                "unit": "colher",
+                "g": 0.1,
+                "c": 6,
+                "name": "arroz",
+                "qtd": 1
+              },
+              {
+                "id": "mqbe27pk34dyy",
+                "k": 450,
+                "p": 30,
+                "unit": "1",
+                "c": 35,
+                "g": 17,
+                "qtd": 1,
+                "name": "almoco"
+              },
+              {
+                "g": 2,
+                "c": 3,
+                "name": "Whey",
+                "qtd": 1,
+                "id": "mqbkxndwr7bzf",
+                "p": 24,
+                "k": 120,
+                "unit": "scoop"
+              }
+            ],
+            "check": {}
+          }
+        },
+        "cardio": {
+          "2026-06-09": {},
+          "2026-06-08": {}
+        },
+        "exams": [],
+        "loads": [],
+        "wheel": [],
+        "supplements": {
+          "2026-06-09": {},
+          "2026-06-08": {
+            "Seg_Testo": false
+          }
+        }
+      },
+      "created": "13/06/2026, 11:00:36"
+    }
+  },
+  "updatedAtMs": 1781368249584,
+  "avatar": {
+    "style": "auto"
+  },
+  "weights": [
+    {
+      "value": 70,
+      "date": "2026-06-12"
+    },
+    {
+      "value": 70,
+      "date": "2026-06-12"
+    },
+    {
+      "date": "2026-06-12",
+      "value": 70
+    },
+    {
+      "date": "2026-06-12",
+      "value": 70
+    },
+    {
+      "date": "2026-06-12",
+      "value": 70
+    },
+    {
+      "value": 70,
+      "date": "2026-06-12"
+    }
+  ],
+  "cardio": {
+    "2026-06-08": {},
+    "2026-06-09": {}
+  },
+  "wheel": [],
+  "supplements": {
+    "2026-06-08": {
+      "Seg_Testo": false
+    },
+    "2026-06-09": {}
+  },
+  "exams": [],
+  "loads": [],
+  "tasks": [
+    {
+      "done": true,
+      "start": "11:00",
+      "title": "festa",
+      "date": "2026-06-13",
+      "priority": "Média",
+      "obs": "",
+      "id": "mqbd2omnpxl5w",
+      "end": "18:00"
+    },
+    {
+      "date": "2026-06-20",
+      "priority": "Alta",
+      "obs": "",
+      "id": "mqbdaprzousp9",
+      "end": "21:00",
+      "start": "18:30",
+      "done": false,
+      "title": "Festa Sopfia"
+    },
+    {
+      "id": "mqcknr83t7ia2",
+      "title": "Junina ad",
+      "date": "2026-06-20",
+      "start": "15:00",
+      "end": "17:30",
+      "priority": "Alta",
+      "obs": "",
+      "done": false
+    }
+  ],
+  "lastSaved": "13/06/2026, 13:30:49",
+  "monthlyReports": {},
+  "meals": {
+    "2026-06-12": {
+      "water": 0.5,
+      "items": [
+        {
+          "g": 2,
+          "c": 8,
+          "name": "whwy caixinha",
+          "qtd": 1,
+          "id": "mqbdzb7j9j67l",
+          "p": 15,
+          "k": 100,
+          "unit": "1"
+        },
+        {
+          "name": "whwy caixinha",
+          "qtd": 1,
+          "g": 2,
+          "c": 8,
+          "unit": "1",
+          "p": 15,
+          "k": 100,
+          "id": "mqbdzj24ry0fd"
+        },
+        {
+          "g": 0.1,
+          "c": 6,
+          "name": "arroz",
+          "qtd": 1,
+          "id": "mqbe03ns6afvq",
+          "k": 32,
+          "p": 0.7,
+          "unit": "colher"
+        },
+        {
+          "unit": "1",
+          "k": 450,
+          "p": 30,
+          "id": "mqbe27pk34dyy",
+          "name": "almoco",
+          "qtd": 1,
+          "g": 17,
+          "c": 35
+        },
+        {
+          "p": 24,
+          "k": 120,
+          "unit": "scoop",
+          "id": "mqbkxndwr7bzf",
+          "qtd": 1,
+          "name": "Whey",
+          "c": 3,
+          "g": 2
+        }
+      ],
+      "check": {}
+    },
+    "2026-06-13": {
+      "check": {},
+      "items": [
+        {
+          "c": 200,
+          "g": 8,
+          "qtd": 1,
+          "name": "Caldo",
+          "id": "mqblmyhcxl6gg",
+          "unit": "manual",
+          "k": 1050,
+          "p": 70
+        }
+      ],
+      "water": 0
+    }
+  }
+}

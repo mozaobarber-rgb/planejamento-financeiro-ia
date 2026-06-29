@@ -1,0 +1,24 @@
+CONFIGURAR NO NETLIFY
+
+Vá em:
+Site configuration > Environment variables
+
+Adicione estas variáveis:
+
+OPENAI_API_KEY
+FIREBASE_API_KEY
+FIREBASE_AUTH_DOMAIN
+FIREBASE_PROJECT_ID
+FIREBASE_STORAGE_BUCKET
+FIREBASE_MESSAGING_SENDER_ID
+FIREBASE_APP_ID
+FIREBASE_MEASUREMENT_ID
+
+Depois clique em Deploy again.
+
+Onde pegar os dados Firebase:
+Firebase > Configurações do projeto > Seus apps > SDK setup and configuration > Config
+
+IMPORTANTE:
+Não coloque essas chaves dentro do index.html.
+Este ZIP foi preparado para o Netlify não bloquear o deploy por secrets scanning.

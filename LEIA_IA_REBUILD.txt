@@ -1,0 +1,17 @@
+IA REBUILD LIMPA
+
+Esta versão reconstrói somente a IA.
+
+Depois de subir no Netlify:
+1. Vá em Site configuration > Environment variables
+2. Crie/garanta:
+   OPENAI_API_KEY = sua chave da OpenAI
+3. Clique em Deploy again.
+4. Aguarde o deploy terminar totalmente.
+
+Teste direto da função:
+Abra no navegador:
+https://SEU-SITE.netlify.app/.netlify/functions/analisar-prato
+
+Se aparecer JSON com "Método não permitido", a função existe.
+Se aparecer uma página HTML, a função não foi publicada no deploy.

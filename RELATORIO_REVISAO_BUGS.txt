@@ -1,0 +1,27 @@
+RELATÓRIO DE REVISÃO
+
+Problemas encontrados:
+- Havia múltiplos patches de tarefas/sincronização sobrepostos: __tarefasNaoSomeFinal, __syncBackupCelularFix.
+- Isso podia causar:
+  1. formulário de tarefas sumir ao digitar;
+  2. checkbox "feito" não persistir;
+  3. celular e PC salvarem em locais diferentes;
+  4. renderização de uma aba interferir em outra.
+
+Correções aplicadas:
+- Removidos patches antigos de tarefas e sync.
+- Criada uma única camada de sincronização.
+- Backup do celular incluído e normalizado no banco principal.
+- Todas as abas continuam usando o mesmo objeto db.
+- Salvar grava em localStorage, tenta funções originais do site e tenta Firestore quando disponível.
+- Ao atualizar/voltar foco no PC ou celular, o sistema busca o dado mais recente.
+- Tarefas agora têm: registrar, marcar feito, editar, excluir, forçar sincronização.
+- O formulário de tarefas preserva o texto enquanto digita.
+
+Como testar:
+1. Suba este ZIP no Netlify.
+2. Abra no celular e no PC no mesmo link.
+3. No celular, cadastre uma tarefa e clique em Forçar sincronização.
+4. Atualize o PC.
+5. Marque a tarefa como feita no PC.
+6. Atualize o celular.

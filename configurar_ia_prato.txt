@@ -1,0 +1,19 @@
+CONFIGURAR IA DO PRATO
+
+1. Suba este ZIP no Netlify.
+2. No painel do Netlify, vá em:
+   Site configuration > Environment variables
+3. Crie a variável:
+   OPENAI_API_KEY
+4. Coloque sua chave da OpenAI.
+5. Faça novo deploy do site.
+
+No site:
+- Abra Alimentação.
+- Clique em "Analisar prato com IA".
+- Tire/envie a foto.
+- A IA calcula uma estimativa.
+- Você confirma para adicionar ao gráfico.
+
+Observação:
+A análise por foto é uma estimativa. Sempre confira e ajuste antes de confirmar.

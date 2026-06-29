@@ -1,0 +1,19 @@
+CORREÇÃO DE TAREFAS
+
+Base: backup do celular enviado em backup-saude-2026-06-13.json.
+
+Corrigido:
+- Registrar tarefa no celular e PC.
+- Campo data.
+- Hora início.
+- Hora fim.
+- Prioridade.
+- Observação.
+- Marcar concluída.
+- Editar.
+- Excluir.
+- Salvar alterações usando funções existentes do site.
+- Mantido o backup do celular como fonte de dados.
+- Visual e demais abas preservados.
+
+Suba este ZIP no Netlify.

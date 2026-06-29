@@ -1,0 +1,13 @@
+Regras TEMPORÁRIAS para testar a sincronização do Daniel Health OS:
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /health_app/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
+
+Depois que sincronizar, podemos travar com login.

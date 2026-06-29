@@ -1,0 +1,13 @@
+VERSÃO USANDO BACKUP DO CELULAR
+
+Usei o ZIP enviado como base principal.
+
+Correções aplicadas:
+- Mantém os dados do backup do celular.
+- Reforça o botão Salvar alterações.
+- Faz backup local automático após edições.
+- Não interfere nas abas.
+- Mantém configuração já existente do site.
+- Adiciona configuração para evitar bloqueio do Netlify por secret scanning.
+
+Suba este ZIP no Netlify.

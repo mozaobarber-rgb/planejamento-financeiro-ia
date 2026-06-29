@@ -1,0 +1,20 @@
+IA SEM NETLIFY FUNCTION
+
+Seu teste mostrou 404 em /.netlify/functions/analisar-prato.
+Isso significa que a Function não está sendo publicada no modo de deploy usado.
+
+Esta versão remove a dependência da Netlify Function.
+
+Como funciona:
+1. Abra Alimentação.
+2. Cole sua OPENAI_API_KEY no campo da IA.
+3. Clique em Salvar chave.
+4. Tire/envie a foto.
+5. Clique em Analisar foto.
+6. Confirme para adicionar na alimentação.
+
+A chave fica salva apenas no navegador/aparelho onde você colou.
+
+Atenção:
+Essa solução expõe a chave no navegador daquele aparelho.
+Use apenas em site privado/seu.

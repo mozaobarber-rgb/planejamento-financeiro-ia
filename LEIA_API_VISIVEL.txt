@@ -1,0 +1,12 @@
+API VISÍVEL
+
+Agora o site tem:
+- Aba IA no menu principal.
+- Campo da chave também no topo da aba Alimentação.
+- Campo da chave também na aba Backup.
+
+Use:
+1. Abra a aba IA ou Alimentação.
+2. Cole a chave API da OpenAI.
+3. Clique em Salvar chave da IA.
+4. A IA passa a usar automaticamente.
